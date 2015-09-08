@@ -15,6 +15,7 @@ import collections
 import numbers
 import logging
 import sys
+import time
 from xml.dom.minidom import parseString
 
 
@@ -145,6 +146,8 @@ def convert(obj, ids, attr_type, parent='root'):
         return convert_dict(obj, ids, parent, attr_type)
     if isinstance(obj, collections.Iterable):
         return convert_list(obj, ids, parent, attr_type)
+    if isinstance(obj, time.struct_time):
+        return time.strftime("%a, %d %b %Y %H:%M:%S +0000", obj)
     raise TypeError('Unsupported data type: %s (%s)' % (obj, type(obj).__name__))
 
 def convert_dict(obj, ids, parent, attr_type):
@@ -182,6 +185,8 @@ def convert_dict(obj, ids, parent, attr_type):
             )
         elif val is None:
             addline(convert_none(key, val, attr_type, attr))
+        elif isinstance(val, time.struct_time):
+            addline(convert_kv(key, time.strftime("%a, %d %b %Y %H:%M:%S +0000", val), attr_type, attr))
         else:
             raise TypeError('Unsupported data type: %s (%s)' % (val, type(val).__name__))
     return ''.join(output)
